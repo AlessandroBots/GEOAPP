@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html lang="it">
+<head>
+    <title>Heatmap - Smart Agriculture</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+    <script>
+        function inserimentoGoogleMapsAPI() {
+            const script = document.createElement("script");
+            script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyACgxrdHT3MrMhST5oQNh5XE8hYgm1B7Bg&libraries=visualization&callback=initMap";
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+        window.onload = inserimentoGoogleMapsAPI;
+    </script>
+
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header">
+            <a href= "index.html" class="logo"><strong>Applicazione Annual Crop Yields</strong></a>
+            <nav><a href="#menu">Menu</a></nav>
+        </header>
+
+        <nav id="menu">
+            <ul class="links">
+                <li><a href="/map">HeatMAP</a></li>
+                <li><a href="/graph">Moisture per Species</a></li>
+                <li><a href="/graph2">Confronto Moisture</a></li>
+            </ul>
+            <ul class="actions stacked">
+                <li><a href="/logout" class="button fit">Logout</a></li>
+            </ul>
+        </nav>
+
+        <div id="main" class="alt">
+            <section id="one">
+                <div class="inner">
+                    <header class="major">
+                        <h1>Heatmap delle Coordinate</h1>
+                    </header>
+                    <label for="year-select">Seleziona l'anno:</label>
+                    <select id="year-select" onchange="CreazioneMappaxAnni()">
+                        <option value="">Seleziona un anno</option>
+                    </select>
+                    <div id="map" style="width: 100%; height: 500px;"></div>
+                </div>
+            </section>
+        </div>
+
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/jquery.scrolly.min.js"></script>
+        <script src="assets/js/jquery.scrollex.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script src="assets/js/jquery.min.js"></script>
+
+        <script>
+            let map, heatmap, allData = [];
+
+            function initMap() {
+                console.log("Google Maps API caricata con successo!");
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 5,
+                    center: { lat: 42.0, lng: -85.0 },
+                    mapTypeId: "satellite"
+                });
+
+                TrovaAnniColture();
+            }
+
+            function TrovaAnniColture() {
+                $.get("http://localhost:80/get_data", function(response) {
+                    console.log(response);
+
+                    let data;
+                    try {
+                        data = typeof response === "string" ? JSON.parse(response) : response;
+                    } catch (error) {
+                        return;
+                    }
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        return;
+                    }
+
+                    allData = data;
+                    let years = [...new Set(data.map(item => item.year))];
+                    console.log(years);
+
+
+                    let select = document.getElementById("year-select");
+                    select.innerHTML = '<option value="">Seleziona un anno</option>';
+
+                    years.forEach(year => {
+                        let option = document.createElement("option");
+                        option.value = year;
+                        option.textContent = year;
+                        select.appendChild(option);
+                    });
+                }).fail(function(xhr, status, error) {
+                    console.error(status, error);
+                });
+            }
+
+            function CreazioneMappaxAnni() {
+                let selectedYear = document.getElementById("year-select").value;
+                if (!selectedYear) {
+                    return;
+                }
+
+                let data;
+                try {
+                    data = typeof allData === "string" ? JSON.parse(allData) : allData;
+                } catch (error) {
+                    return;
+                }
+
+                let heatmapData = data
+                    .filter(item => item.year == selectedYear)
+                    .map(item => new google.maps.LatLng(item.latitude, item.longitude));
+
+                if (heatmapData.length === 0) {
+                    return;
+                }
+
+                if (heatmap) {
+                    heatmap.setMap(null);
+                }
+
+                heatmap = new google.maps.visualization.HeatmapLayer({
+                    data: heatmapData,
+                    map: map,
+                    radius: 30,
+                    opacity: 0.7
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

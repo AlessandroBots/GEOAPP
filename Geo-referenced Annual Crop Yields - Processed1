@@ -1,0 +1,30 @@
+# Geo-referenced Annual Crop Yields - Processed
+#
+# Original Data Source: http://lter.kbs.msu.edu/datatables/185
+# The newest version of the data http://lter.kbs.msu.edu/datatables/185.csv
+# Full EML Metadata: http://lter.kbs.msu.edu/datatables/40.eml
+#
+# These Data are copyrighted and use in a publication requires permission
+# as detailed in our Terms of use:  http://lter.kbs.msu.edu/data/terms-of-use/
+# Use of the data constitutes acceptance of the terms.
+#
+#     VARIATE TABLE
+# longitude	degree	sample location
+# latitude	degree	sample location
+# yield	bushelsPerAcre	grain yield
+# species		harvested crop
+# moisture	gramsPerHectograms	grain moisture in percent
+# year		year the crop was harvested
+#
+#
+#        DATA TABLE CORRECTIONS AND COMMENTS
+#
+#
+longitude,latitude,yield,species,moisture,year
+#degree,degree,bushelsPerAcre,,gramsPerHectograms,
+-85.3726570729292,42.4123191318918,38.56,soybeans,0.03,2012
+-85.3726509986261,42.4122246065249,31.88,soybeans,0.03,2012
+-85.3726509986261,42.4122246065249,31.88,soybeans,0.03,2012
+-85.3726595026504,42.4123938519438,38.85,soybeans,-22229.000,2012
+-85.3726570729292,42.4123326355157,38.26,soybeans,0.03,2012
+-85.372654643208,42.4122912244025,47.93,soybeans,0.03,2012

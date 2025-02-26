@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html lang="it">
+<head>
+    <title>Grafico Moisture per Specie</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header">
+             <a href= "index.html" class="logo"><strong>Applicazione Annual Crop Yields</strong></a>
+            <nav><a href="#menu">Menu</a></nav>
+        </header>
+
+        <nav id="menu">
+            <ul class="links">
+                <li><a href="/map">HeatMAP</a></li>
+                <li><a href="/graph">Moisture per Species</a></li>
+                <li><a href="/graph2">Confronto Moisture</a></li>
+            </ul>
+            <ul class="actions stacked">
+                <li><a href="/logout" class="button fit">Logout</a></li>
+            </ul>
+        </nav>
+
+        <div id="main" class="alt">
+            <section id="one">
+                <div class="inner">
+                    <header class="major">
+                        <h1>Grafico Moisture per Specie</h1>
+                    </header>
+                    <label for="species-select">Seleziona una specie:</label>
+                    <select id="species-select" onchange="creazioneGraficoxSpecie()">
+                        <option value="">Seleziona una specie</option>
+                    </select>
+                    <div id="chart_div" style="width: 100%; height: 500px; background-color: transparent;"></div>
+                </div>
+            </section>
+        </div>
+
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/jquery.scrolly.min.js"></script>
+        <script src="assets/js/jquery.scrollex.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/jquery.min.js"></script>
+
+        <script>
+            let allData = [];
+
+            function TrovaSpecieColture() {
+                $.get("http://localhost:80/get_data", function(response) {
+                    console.log(response);
+
+                    let data;
+                    try {
+                        data = typeof response === "string" ? JSON.parse(response) : response;
+                        console.log(data);
+                    } catch (error) {
+                        return;
+                    }
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        console.warn("Nessun dato disponibile!");
+                        return;
+                    }
+
+                    allData = data;
+
+                    let speciesList = [...new Set(data.map(item => item.species))];
+
+                    let select = document.getElementById("species-select");
+                    select.innerHTML = '<option value="">Seleziona una specie</option>';
+
+                    speciesList.forEach(species => {
+                        let option = document.createElement("option");
+                        option.value = species;
+                        option.textContent = species;
+                        select.appendChild(option);
+                    });
+                }).fail(function(xhr, status, error) {
+                    console.error(status, error);
+                });
+            }
+
+            google.charts.load('current', {packages: ['corechart', 'line']});
+            google.charts.setOnLoadCallback(TrovaSpecieColture);
+
+            function creazioneGraficoxSpecie() {
+                let selectedSpecies = document.getElementById("species-select").value;
+                if (!selectedSpecies) {
+                    return;
+                }
+
+
+
+                let data;
+                try {
+                    data = typeof allData === "string" ? JSON.parse(allData) : allData;
+                } catch (error) {
+                    return;
+                }
+
+                let moisturePerYear = {};
+
+                data.forEach(item => {
+                    if (item.species === selectedSpecies) {
+                        let year = parseInt(item.year);
+                        if (!moisturePerYear[year]) {
+                            moisturePerYear[year] = {
+                                totalMoisture: 0,
+                                count: 0
+                            };
+                        }
+                        moisturePerYear[year].totalMoisture += item.moisture;
+                        moisturePerYear[year].count += 1;
+                    }
+                });
+
+                let chartData = [["Anno", "Moisture Media", { role: "tooltip", type: "string" }]];
+
+                Object.keys(moisturePerYear).sort().forEach(year => {
+                    let avgMoisture = moisturePerYear[year].totalMoisture / moisturePerYear[year].count;
+                    let tooltipText = `Anno: ${year}\nMoisture Media: ${avgMoisture.toFixed(2)}`;
+                    chartData.push([year, avgMoisture, tooltipText]);
+                });
+
+                let dataTable = google.visualization.arrayToDataTable(chartData);
+
+                let options = {
+                    title: `Andamento Moisture per ${selectedSpecies}`,
+                    titleTextStyle: { color: 'white', fontSize: 20 },
+                    hAxis: {
+                        title: 'Anno',
+                        textStyle: { color: 'white' },
+                        titleTextStyle: { color: 'white' },
+                        format: '####',  //
+                        gridlines: { count: -1 }
+                    },
+                    vAxis: {
+                        title: 'Moisture Media',
+                        textStyle: { color: 'white' },
+                        titleTextStyle: { color: 'white' }
+                    },
+                    backgroundColor: 'transparent',
+                    legend: { position: 'bottom', textStyle: { color: 'white' } },
+                    series: {
+                        0: { color: '#FFA500' }
+                    }
+                };
+
+                let chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(dataTable, options);
+            }
+        </script>
+
+    </div>
+</body>
+</html>

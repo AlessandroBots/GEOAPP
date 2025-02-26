@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html lang="it">
+<head>
+    <title>Login - Applicazione Crop Yields</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header" class="alt">
+            <a href="index.html" class="logo"><strong>Applicazione Crop Yields</strong></a>
+        </header>
+        <div id="main" class="alt">
+            <section id="one">
+                <div class="inner">
+                    <header class="major">
+                        <h1>Login</h1>
+                    </header>
+                    <form method="POST" action="/login">
+                        <div class="fields">
+                            <div class="field">
+                                <label for="email">Email</label>
+                                <input type="email" name="e" id="email" required />
+                            </div>
+                            <div class="field">
+                                <label for="password">Password</label>
+                                <input type="password" name="p" id="password" required />
+                            </div>
+                        </div>
+                        <ul class="actions">
+                            <li><input type="submit" value="Accedi" class="button primary" /></li>
+                        </ul>
+                    </form>
+                <ul class="actions stacked">
+                    <li><a href="/register" class="button primary">Registrati</a></li>
+                </ul>
+                <p id="error-message" style="color: red;"></p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get('error');
+        if (error) {
+            document.getElementById('error-message').innerText = decodeURIComponent(error);
+        }
+    </script>
+
+
+</body>
+</html>
